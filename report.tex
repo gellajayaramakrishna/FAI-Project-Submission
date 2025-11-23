@@ -1,0 +1,293 @@
+% Complete LaTeX report for GridWorld RL project
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{algorithm2e}
+\usepackage{xcolor}
+\usepackage{array}
+
+\title{GridWorld  RL Algorithms in Games\\CS329: Foundations of Artificial Intelligence\\Fall 2025}
+\author{Jangam Sanjay(23110144), Gella Jayarama Krishna(23110115)}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This project implements and compares three classical tabular reinforcement learning algorithms, Q-Learning, SARSA, and First-Visit Monte Carlo on GridWorld and provides an interactive visualization, analysis scripts that aggregate per-episode CSVs, and reproducible plots. The report summarizes methods, hyperparameters, learning curves (mean $\pm$ std), policy and value visualizations, and convergence analysis.
+\end{abstract}
+
+\section{Introduction}
+Reinforcement Learning (RL) studies how agents learn sequential decision-making through trial-and-error
+interaction with an environment. The goal of this project is to implement and compare classical tabular
+RL algorithms within a controllable and fully observable GridWorld setting.
+
+The system includes an interactive web-based environment where the user can define grid layouts, modify
+obstacles, visualize the agent’s policy, and monitor learning curves in real time. For experimental analysis,
+a GridWorld configuration 5$\times$ 5 was used as the primary environment due to its simplicity and clear
+interpretability of the policies. However, the platform also supports larger grid sizes such as 7$\times$7, allowing
+experiments to be extended to more complex navigation tasks.
+
+The overall objectives of the project were:
+\begin{enumerate}
+    \item Implement standard tabular RL algorithms (Q-Learning, SARSA, and First-Visit Monte Carlo).
+    \item Provide an interactive GridWorld environment with real-time visualization tools.
+    \item Run headless training experiments to generate per-episode CSV logs.
+    \item Analyze and compare learning trends between algorithms using summary statistics and learning curves.
+    \item Demonstrate scalability by supporting multiple grid sizes, including 5$\times$5 and 7$\times$7 configurations.
+\end{enumerate}
+
+
+\section{Algorithms}
+We implemented three tabular control methods:
+
+\begin{itemize}
+  \item \textbf{Q-Learning (off-policy TD)}:  
+  $Q(s,a)\leftarrow Q(s,a) + \alpha[r + \gamma \max_{a'} Q(s',a') - Q(s,a)]$
+  
+  \item \textbf{SARSA (on-policy TD)}:  
+  $Q(s,a)\leftarrow Q(s,a) + \alpha[r + \gamma Q(s',a') - Q(s,a)]$
+  
+  \item \textbf{First-Visit Monte Carlo}:  
+  $Q(s,a)\leftarrow Q(s,a) + \alpha[G - Q(s,a)]$
+\end{itemize}
+
+% -----------------------------------------------------------
+% Q-LEARNING PSEUDOCODE
+% -----------------------------------------------------------
+\subsection{Pseudocode (Q-Learning)}
+\begin{algorithm}[H]
+\SetAlgoLined
+Initialize $Q(s,a)$ for all $s,a$\\
+\For{each episode}{
+  $s \leftarrow$ start state\\
+  \While{$s$ is not terminal}{
+    Choose $a$ from $s$ using $\epsilon$-greedy on $Q$\\
+    Take action $a$, observe $r, s'$\\
+    $Q(s,a) \leftarrow Q(s,a) + \alpha[r + \gamma\max_{a'} Q(s',a') - Q(s,a)]$\\
+    $s \leftarrow s'$
+  }
+}
+\caption{Q-Learning}
+\end{algorithm}
+
+% -----------------------------------------------------------
+% SARSA PSEUDOCODE
+% -----------------------------------------------------------
+\subsection{Pseudocode (SARSA)}
+\begin{algorithm}[H]
+\SetAlgoLined
+Initialize $Q(s,a)$ for all $s,a$\\
+\For{each episode}{
+  $s \leftarrow$ start state\\
+  Choose $a$ from $s$ using $\epsilon$-greedy\\
+  \While{$s$ is not terminal}{
+    Take action $a$, observe $r, s'$\\
+    Choose $a'$ from $s'$ using $\epsilon$-greedy\\
+    $Q(s,a) \leftarrow Q(s,a) + \alpha[r + \gamma Q(s',a') - Q(s,a)]$\\
+    $s \leftarrow s'$\\
+    $a \leftarrow a'$
+  }
+}
+\caption{SARSA (On-Policy TD Control)}
+\end{algorithm}
+
+% -----------------------------------------------------------
+% MONTE CARLO PSEUDOCODE
+% -----------------------------------------------------------
+\subsection{Pseudocode (First-Visit Monte Carlo)}
+\begin{algorithm}[H]
+\SetAlgoLined
+Initialize $Q(s,a)$ arbitrarily\\
+\For{each episode}{
+  Generate an episode $(s_0,a_0,r_1,\dots,s_T)$ using $\epsilon$-greedy\\
+  $G \leftarrow 0$\\
+  \For{t = T-1 down to 0}{
+    $G \leftarrow r_{t+1} + \gamma G$\\
+    \If{first visit to $(s_t,a_t)$}{
+      $Q(s_t,a_t) \leftarrow Q(s_t,a_t) + \alpha[G - Q(s_t,a_t)]$
+    }
+  }
+}
+\caption{First-Visit Monte Carlo}
+\end{algorithm}
+
+% -----------------------------------------------------------
+\section{Environment}
+GridWorld is a discrete $n \times n$ grid with:
+
+\begin{itemize}
+\item Actions: Up, Right, Down, Left
+\item Rewards: +10 (goal), −0.1 (step), −1 (collision)
+\item Episodes end on reaching goal or max steps
+\end{itemize}
+
+\section{Experimental Setup}
+Default hyperparameters: $\alpha=0.1$, $\gamma=0.99$, $\epsilon=0.1$.  
+Each CSV contains per-episode: reward, steps, success flag.
+
+% -----------------------------------------------------------
+% SUMMARY TABLE
+% -----------------------------------------------------------
+\section{Results}
+\begin{table}[H]
+\centering
+\caption{Analysis summary from aggregated runs}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Algorithm & Runs & Episodes Used & Mean Reward & Std Reward & Mean Steps & Success Rate & Mean Conv. Ep & Runs Converged \\
+\midrule
+Monte Carlo & 1 & 2000 & 8.80 & 0.6553 & 9.00 & 1.00 & 107 & 1 \\
+Q-Learning  & 1 & 500  & 8.96 & 0.4283 & 8.85 & 1.00 & 42  & 1 \\
+SARSA       & 1 & 600  & 8.71 & 0.5393 & 9.35 & 1.00 & 43  & 1 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+% -----------------------------------------------------------
+% LEARNING CURVES
+% -----------------------------------------------------------
+\subsection{Learning Curves}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.45\linewidth]{avg_reward_shaded_qlearning.png}
+  \includegraphics[width=0.45\linewidth]{avg_steps_shaded_qlearning.png}
+  \caption{Q-Learning learning curves}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.45\linewidth]{avg_reward_shaded_sarsa.png}
+  \includegraphics[width=0.45\linewidth]{avg_steps_shaded_sarsa.png}
+  \caption{SARSA learning curves}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.45\linewidth]{avg_reward_shaded_montecarlo.png}
+  \includegraphics[width=0.45\linewidth]{avg_steps_shaded_montecarlo.png}
+  \caption{Monte Carlo learning curves}
+\end{figure}
+
+% -----------------------------------------------------------
+\section{Convergence Analysis}
+\label{sec:convergence}
+
+We evaluate convergence by examining per-episode success (reaching the goal) and reward stability. 
+For each run, we declare convergence at the first episode where, over a sliding window of 20 episodes, 
+the success rate is at least 75\% and the reward standard deviation within the window is at most 1.0. 
+These thresholds were chosen to identify behavior that is both reliably successful and reward-stable; 
+they are configurable in the analysis script.
+
+Table~\label{tab:analysis_summary} summarizes per-algorithm aggregate metrics (from 
+\texttt{analysis\_summary}). Under the current experimental set of runs:
+
+\begin{itemize}
+    \item \textbf{Q-Learning:} mean convergence episode $\approx 42$ (1 run converged).
+    \item \textbf{SARSA:} mean convergence episode $\approx 43$ (1 run converged).
+    \item \textbf{Monte Carlo (First-Visit):} mean convergence episode $\approx 107$ (1 run converged).
+\end{itemize}
+
+\subsection*{Interpretation}
+\begin{itemize}
+    \item Q-Learning and SARSA converge substantially faster than Monte Carlo. 
+    This aligns with known behavior: TD methods update at every step, while Monte Carlo updates 
+    only once per episode and suffers higher return variance.
+    \item With only one run per algorithm, the ``mean'' values are equivalent to single-run values; 
+    more repetitions are needed for statistically meaningful comparisons.
+    \item The absolute convergence episode counts depend on grid layout, rewards, $\alpha$, $\gamma$, 
+    exploration rate $\epsilon$, and the number of training episodes.
+\end{itemize}
+
+\subsection*{Limitations}
+\begin{itemize}
+    \item Results are based on single runs per algorithm; convergence episode variance cannot be estimated.
+    \item Convergence depends heavily on the chosen detection thresholds 
+    (window size, success probability, reward variability).
+    \item Tabular methods do not generalize across different grid sizes, obstacles, or reward shaping.
+\end{itemize}
+
+\subsection*{Recommendations}
+\begin{enumerate}
+    \item Run 10--30 repetitions per algorithm using different random seeds to compute confidence intervals.
+    \item Report median and interquartile range for convergence episodes, since the distribution is often skewed.
+    \item Perform hyperparameter sweeps (e.g., $\epsilon$ decay, different $\alpha$ values) to study robustness.
+    \item Analyze how convergence changes if detection thresholds are tightened or relaxed.
+\end{enumerate}
+
+
+\section{Discussion}
+
+The experimental results reveal clear and consistent differences in how the three reinforcement learning
+algorithms learn optimal behaviour in the GridWorld environment. All methods eventually achieved a
+stable success rate of 1.0, indicating that each algorithm was able to discover a reliable policy for reaching
+the goal. However, the number of episodes required to reach this stable performance varied significantly
+across algorithms.
+
+Q-Learning demonstrated the fastest convergence, stabilizing at approximately episode 42. This behaviour
+aligns with theoretical expectations: as an off-policy temporal-difference method, Q-Learning updates its
+action-value estimates using the greedy action in the next state, regardless of the action actually taken.
+This enables faster propagation of high-value estimates and often results in quicker convergence in
+deterministic environments.
+
+SARSA converged at around episode 43, only marginally slower than Q-Learning. Since SARSA is an
+on-policy method, it updates action values according to the action selected by the current $\epsilon$-greedy
+policy, leading to more conservative updates. In environments with stochastic transitions or penalties
+for risky behaviour, SARSA tends to differ more from Q-Learning, but in this simple and mostly
+deterministic GridWorld the two algorithms performed almost identically.
+
+Monte Carlo learning converged much more slowly, at approximately episode 107. This is expected
+because Monte Carlo methods update value estimates only at the end of each episode, based on full return
+estimates that tend to have higher variance. As a result, learning is slower and requires significantly more
+episodes to stabilize. Despite this, Monte Carlo still reached a consistently successful policy, confirming
+its reliability when enough training data is provided.
+
+While the experiments achieve qualitative insight into algorithm behaviour, they are limited by the fact
+that only a single run was executed per algorithm. This prevents reliable estimation of variance across
+different random seeds. Additionally, performance is highly dependent on hyperparameters such as
+$\alpha$, $\gamma$, and $\epsilon$, as well as the GridWorld layout. More extensive experiments with
+multiple seeds, different reward configurations, and exploration schedules (e.g., $\epsilon$ decay) would
+provide a more robust comparison.
+
+Overall, the results confirm well-known properties of RL algorithms: temporal-difference methods are
+more sample-efficient and converge faster than Monte Carlo, while still maintaining stability in simple
+environments like GridWorld.
+
+
+\section{Conclusion}
+
+This project implemented and compared three classical reinforcement learning algorithms Q-Learning,
+SARSA, and First-Visit Monte Carlo within a custom GridWorld environment equipped with interactive
+visualization and automated analysis tools. All algorithms successfully learned an optimal policy and
+achieved a final success rate of 1.0, confirming their ability to solve the navigation task. However, the
+experiments also revealed clear differences in sample efficiency: Q-Learning converged fastest, followed
+closely by SARSA, while Monte Carlo required significantly more episodes due to its reliance on full
+returns and higher variance updates.
+
+The convergence behaviour observed aligns with theoretical expectations and demonstrates the practical
+advantages of temporal-difference methods in deterministic, low-dimensional environments. The
+analysis pipeline, including per-episode logging, summary statistics, and shaded learning-curve plots,
+provides a reproducible framework for evaluating RL algorithms.
+
+Despite these promising results, the study is limited by the use of single-run experiments, fixed
+hyperparameters, and a simple grid layout. Future extensions should incorporate multiple random seeds,
+hyperparameter sweeps, larger or stochastic environments, and more advanced methods such as eligibility
+traces or the neural network function approximation. These additions would enable deeper comparisons and
+greater insight into algorithm stability and scalability.
+
+Overall, this project demonstrates the fundamental learning characteristics of three widely used RL
+algorithms and highlights the importance of experimental design in evaluating reinforcement learning
+behaviour.
+
+
+\end{document}

@@ -1,0 +1,44 @@
+:root{
+	--cell-size: 44px;
+	--gap: 4px;
+}
+*{box-sizing:border-box;font-family:Segoe UI,Arial,Helvetica,sans-serif}
+body{margin:16px;background:#f6f8fb;color:#111}
+main{max-width:920px;margin:0 auto}
+h1{font-size:18px;margin:0 0 12px}
+.controls{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.board-area{display:flex;gap:12px;align-items:flex-start}
+.controls .top-row{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.controls .sliders{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+.controls .sliders label{font-size:13px}
+.controls .buttons{display:flex;gap:8px;align-items:center}
+.controls input[type=number]{width:80px;padding:4px}
+.grid{display:grid;background:#ddd;padding:8px;border-radius:6px}
+.cell{width:var(--cell-size);height:var(--cell-size);display:inline-block;border-radius:4px;background:white;border:1px solid #cfcfcf}
+.cell{position:relative}
+.cell .policy{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(0,0,0,0.85);pointer-events:none}
+.cell .heat{position:absolute;left:0;right:0;top:0;bottom:0;border-radius:4px;opacity:0.6;pointer-events:none}
+.cell.empty{background:#fff}
+.cell.obstacle{background:#111}
+.cell.start{background:#f5d76e}
+.cell.goal{background:#2ecc71}
+.cell.agent{background:#3498db}
+.cell.move{box-shadow:0 6px 18px rgba(0,0,0,0.12);transform:translateY(-6px);transition:transform 0.18s ease, box-shadow 0.18s ease}
+.legend{min-width:160px}
+.legend h3{margin:0 0 8px}
+.legend .legend-cell{display:inline-block;width:20px;height:20px;vertical-align:middle;margin-right:8px;border-radius:3px}
+#status{margin-left:12px;font-size:14px}
+button{padding:6px 10px;border-radius:5px;border:1px solid #bbb;background:#fff;cursor:pointer}
+button:disabled{opacity:0.5;cursor:default}
+
+/* charts */
+.charts{margin-top:18px;background:#fff;padding:12px;border-radius:6px;border:1px solid #e2e6ef}
+.charts h2{margin:0 0 8px;font-size:15px}
+.chart-row{display:flex;gap:12px;margin-bottom:10px}
+.chart-col{flex:1}
+
+/* responsive tweaks */
+@media(max-width:740px){
+	.board-area{flex-direction:column}
+	.chart-row{flex-direction:column}
+}

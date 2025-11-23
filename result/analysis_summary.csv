@@ -1,0 +1,4 @@
+algorithm,runs,episodes_used,mean_reward_last_window,std_reward_last_window,mean_steps_last_window,success_rate_last_window_mean,mean_convergence_episode,std_convergence_episode,runs_converged
+montecarlo,1,2000,8.799999999999999,0.6553424175273,9.0,1.0,107.0,,1
+qlearning,1,500,8.964999999999998,0.4283075628809891,8.85,1.0,42.0,,1
+sarsa,1,600,8.714999999999998,0.5392733902888998,9.35,1.0,43.0,,1

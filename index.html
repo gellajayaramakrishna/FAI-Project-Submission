@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>GridWorld - Demo</title>
+	<link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+	<main>
+		<h1>GridWorld — Design Demo</h1>
+
+		<section class="controls">
+			<div class="top-row">
+				<label>Algorithm:
+					<select id="algoSelect">
+						<option value="qlearning">Q-Learning</option>
+						<option value="sarsa">SARSA</option>
+						<option value="montecarlo">Monte Carlo</option>
+					</select>
+				</label>
+
+				<label>Episodes:
+					<input id="episodesInput" type="number" min="1" value="100" />
+				</label>
+
+				<label>Size:
+					<select id="sizeSelect">
+						<option value="5">5 × 5</option>
+						<option value="7">7 × 7</option>
+					</select>
+				</label>
+			</div>
+
+			<div class="sliders">
+				<label>α <input id="alpha" type="range" min="0" max="1" step="0.01" value="0.1" /></label>
+				<span class="slider-value" id="alphaVal">0.10</span>
+				<label>γ <input id="gamma" type="range" min="0" max="1" step="0.01" value="0.99" /></label>
+				<span class="slider-value" id="gammaVal">0.99</span>
+				<label>ε <input id="epsilon" type="range" min="0" max="1" step="0.01" value="0.1" /></label>
+				<span class="slider-value" id="epsilonVal">0.10</span>
+			</div>
+
+			<div class="buttons">
+				<button id="startBtn">Start</button>
+				<button id="pauseBtn" disabled>Pause</button>
+				<button id="resetBtn">Reset</button>
+				<button id="stepBtn">Step (random)</button>
+				<label style="display:flex;align-items:center;gap:6px;margin-left:8px"><input id="headlessMode" type="checkbox" /> Headless mode</label>
+				<label style="display:flex;align-items:center;gap:6px;margin-left:8px"><input id="showPolicy" type="checkbox" /> Show policy</label>
+				<label style="display:flex;align-items:center;gap:6px;margin-left:8px"><input id="showHeatmap" type="checkbox" /> Show value heatmap</label>
+				<label style="display:flex;align-items:center;gap:6px;margin-left:8px"><input id="editMaze" type="checkbox" /> Edit maze</label>
+				<button id="exportBtn">Export CSV</button>
+			</div>
+
+			<div id="status"></div>
+		</section>
+
+		<section class="board-area">
+			<div id="grid" class="grid"></div>
+			<aside class="legend">
+				<h3>Legend</h3>
+				<div><span class="cell legend-cell start"></span> Start (S)</div>
+				<div><span class="cell legend-cell agent"></span> Agent</div>
+				<div><span class="cell legend-cell goal"></span> Goal (G)</div>
+				<div><span class="cell legend-cell obstacle"></span> Obstacle</div>
+				<div><span class="cell legend-cell empty"></span> Empty</div>
+			</aside>
+		</section>
+
+		<footer>
+			<p>Rewards: Goal +10, Step -0.1, Hit obstacle -1. Episode ends at goal or 200 steps.</p>
+		</footer>
+
+		<section class="charts">
+			<h2>Training Charts</h2>
+			<div class="chart-row">
+				<div class="chart-col"><canvas id="rewardChart" width="400" height="200"></canvas></div>
+				<div class="chart-col"><canvas id="stepsChart" width="400" height="200"></canvas></div>
+			</div>
+			<div class="chart-row">
+				<div class="chart-col" style="max-width:820px"><canvas id="convChart" width="820" height="140"></canvas></div>
+			</div>
+		</section>
+
+		<section class="compare" style="margin-top:18px;border-top:1px solid #e6e9f2;padding-top:12px">
+			<h2>Compare Algorithms</h2>
+			<div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
+				<label>Repeats: <input id="compareRepeats" type="number" min="1" value="5" style="width:80px;margin-left:6px"/></label>
+				<label>Episodes per run: <input id="compareEpisodes" type="number" min="10" value="500" style="width:100px;margin-left:6px"/></label>
+				<label>Grid size: <select id="compareSize"><option value="5">5×5</option><option value="7">7×7</option></select></label>
+				<button id="compareBtn">Compare Q-Learning vs SARSA</button>
+			</div>
+
+			<div class="chart-row">
+				<div class="chart-col"><canvas id="cmpRewardChart" width="400" height="220"></canvas></div>
+				<div class="chart-col"><canvas id="cmpStepsChart" width="400" height="220"></canvas></div>
+			</div>
+			<div class="chart-row">
+				<div class="chart-col"><canvas id="cmpConvergeChart" width="400" height="140"></canvas></div>
+				<div class="chart-col"><canvas id="cmpPathChart" width="400" height="140"></canvas></div>
+			</div>
+		</section>
+	</main>
+
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script type="module" src="./main.js"></script>
+</body>
+</html>
